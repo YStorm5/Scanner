@@ -5,17 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanner</title>
+    <style>
+        * {
+            font-family: "calibri";
+        }
+    </style>
 </head>
 
 <body>
     <div id="qr-reader"></div>
     <h4 style="text-align: center;">Code: <span id="result"></span></h4>
-    <div class="price" style="text-align: center;">
-        <h2>Name: <span id="name"></span></h2>
-        <h2>Unit: <span id="unit"></span></h2>
-        <h2>USD: <span id="usd"></span></h2>
-        <h2>KHR: <span id="khr"> </span></h2>
-        <h3 id="desc"></h3>
+    <div class="price" style="text-align: center; border:solid 1px black">
+        <h3>Name: <span id="name" style="color: purple;"></span></h3>
+        <h3>Unit: <span id="unit" style="color:orange"></span></h3>
+        <h3>USD: <span id="usd" style="color:red;"></span></h3>
+        <h3>KHR: <span id="khr" style="color:green;"></span></h3>
+        <p id="desc"></p>
     </div>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -25,21 +30,28 @@
         const khr = document.getElementById("khr");
         const unit = document.getElementById("unit");
         const desc = document.getElementById("desc");
+        const result = document.getElementById("result");
         const { createClient } = supabase
         const apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hemlzd3J6Y3JiY3dnd3ptZ25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODk3NDc1NTksImV4cCI6MjAwNTMyMzU1OX0.CltT0Usef6LHk8eh-JTo7zbyoLkWGaR-OHiyQPsW47k";
         const _supabase = createClient("https://maziswrzcrbcwgwzmgnn.supabase.co", apikey);
         async function onScanSuccess(decodedText, decodedResult) {
+            result.innerText = decodedText;
             let { data: Items, error } = await _supabase
                 .from('Items')
                 .select('*').eq('code', decodedText);
-
-            const result = document.getElementById("result");
-            nameBox.innerText = Items[0]["name"];
-            khr.innerText = Items[0]["price"] + "៛";
-            usd.innerText = Items[0]["price"] / 4000 + "$";
-            unit.innerText = Items[0]["unit"];
-            result.innerText = decodedText;
-            desc.innerText = Items[0]['description'];
+            if (Items.length >= 1) {
+                nameBox.innerText = Items[0]["name"];
+                khr.innerText = Items[0]["price"] + "៛";
+                usd.innerText = Items[0]["price"] / 4000 + "$";
+                unit.innerText = Items[0]["unit"];
+                desc.innerText = Items[0]['description'];
+            } else {
+                nameBox.innerText = "";
+                khr.innerText = "";
+                usd.innerText = "";
+                unit.innerText = "";
+                desc.innerText = "";
+            }
         }
         var html5QrcodeScanner = new Html5QrcodeScanner(
             "qr-reader", { fps: 10, qrbox: 250 });
