@@ -11,16 +11,35 @@
     <div id="qr-reader"></div>
     <h4 style="text-align: center;">Code: <span id="result"></span></h4>
     <div class="price" style="text-align: center;">
-        <h2>Unit: <span>KG</span></h2>
-        <h2>USD: <span id="usd">10 $</span></h2>
-        <h2>KHR: <span id="khr">2000000 ៛</span></h2>
+        <h2>Name: <span id="name"></span></h2>
+        <h2>Unit: <span id="unit"></span></h2>
+        <h2>USD: <span id="usd"></span></h2>
+        <h2>KHR: <span id="khr"> </span></h2>
+        <h3 id="desc"></h3>
     </div>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        function onScanSuccess(decodedText, decodedResult) {
-            console.log(`Code scanned = ${decodedText}`, decodedResult);
+        const nameBox = document.getElementById("name");
+        const usd = document.getElementById("usd");
+        const khr = document.getElementById("khr");
+        const unit = document.getElementById("unit");
+        const desc = document.getElementById("desc");
+        const { createClient } = supabase
+        const apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hemlzd3J6Y3JiY3dnd3ptZ25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODk3NDc1NTksImV4cCI6MjAwNTMyMzU1OX0.CltT0Usef6LHk8eh-JTo7zbyoLkWGaR-OHiyQPsW47k";
+        const _supabase = createClient("https://maziswrzcrbcwgwzmgnn.supabase.co", apikey);
+        async function onScanSuccess(decodedText, decodedResult) {
+            let { data: Items, error } = await _supabase
+                .from('Items')
+                .select('*').eq('code', decodedText);
+
             const result = document.getElementById("result");
+            nameBox.innerText = Items[0]["name"];
+            khr.innerText = Items[0]["price"] + "៛";
+            usd.innerText = Items[0]["price"] / 4000 + "$";
+            unit.innerText = Items[0]["unit"];
             result.innerText = decodedText;
+            desc.innerText = Items[0]['description'];
         }
         var html5QrcodeScanner = new Html5QrcodeScanner(
             "qr-reader", { fps: 10, qrbox: 250 });
